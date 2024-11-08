@@ -8,6 +8,7 @@ from utils import *
 
 
 class TestSynthEngine:
+    title = ' Knob test '
     def __init__(self, hardware):
         self.hardware = hardware
         self.parameters = {}
@@ -96,6 +97,9 @@ class TestSynthEngine:
         self.show_debug_hardware()
         self.display.refresh()
         # Обновление параметров на основе ввода
+        pass
+
+    def update_input(self):
         pass
 
     def get_synth(self):

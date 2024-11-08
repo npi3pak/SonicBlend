@@ -51,10 +51,11 @@ class Hardware:
     def init_display(self):
         displayio.release_displays()
 
-        i2c = busio.I2C(DISPLAY_SCL, DISPLAY_SDA)
+        i2c = busio.I2C(DISPLAY_SCL, DISPLAY_SDA, frequency=100000)
         display_bus = displayio.I2CDisplay(i2c, device_address=0x3C)
         
         self.display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=DISPLAY_WIDTH, height=DISPLAY_HEIGHT)
+        self.display.auto_refresh = False
 
     def init_i2s(self):
         self.i2s = audiobusio.I2SOut(bit_clock=I2S_BCK_PIN, 

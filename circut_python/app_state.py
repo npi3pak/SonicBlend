@@ -5,16 +5,23 @@ from adafruit_display_text import label
 from adafruit_display_shapes.rect import Rect
 import time
 
+TEXT_COLOR = 0xFFFFFF
+BG_COLOR = 0x000000
+
 class Menu:
-    def __init__(self, hardware, handle_select_callback):
+    def __init__(self, hardware, menu_items, handle_select_callback):
         self.hardware = hardware
         self.handle_select_callback = handle_select_callback
+        self.display = self.hardware.get_display()
 
-        # Menu setup
-        self.menu_items = ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"]
+
+        test_list = ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"]
+        menu_items.extend(test_list)
+
+        self.menu_items = menu_items
         self.current_selection = 0
         self.top_index = 0  # First item in the 3-line window
-        self.last_position = self.encoder.position
+        self.last_position = self.hardware.get_encoder().position
 
         # Constants
         self.MAX_DISPLAY_LINES = 3
@@ -22,18 +29,18 @@ class Menu:
         # Display group for screen elements
         self.screen_group = displayio.Group()
 
-        # Highlight rectangle
-        self.highlight_rect = Rect(0, 0, 128, 10, fill=0xFFFFFF)  # Adjust height to fit font
-        self.screen_group.append(self.highlight_rect)
 
         # Text labels for each line
         self.text_areas = []
         for i in range(self.MAX_DISPLAY_LINES):
-            text_area = label.Label(terminalio.FONT, text="", color=0x000000, x=5, y=5 + (i * 11))
+            line_color = BG_COLOR if i is self.current_selection else TEXT_COLOR
+            bg_color = TEXT_COLOR if i is self.current_selection else BG_COLOR
+            
+            text_area = label.Label(terminalio.FONT, text="", color=line_color, background_color=bg_color,x=5, y=5 + (i * 11))
             self.text_areas.append(text_area)
             self.screen_group.append(text_area)
 
-        self.display.show(self.screen_group)
+        self.display.root_group = self.screen_group
         self.update_ui()  # Initial display update
 
     def update_ui(self):
@@ -41,15 +48,22 @@ class Menu:
         Refresh the display based on current menu state.
         """
         # Update highlight position
-        self.highlight_rect.y = (self.current_selection - self.top_index) * 11
+        # self.highlight_rect.y = (self.current_selection - self.top_index) * 11
 
         # Display the current menu items in the window
         for i in range(self.MAX_DISPLAY_LINES):
             item_index = self.top_index + i
             if item_index < len(self.menu_items):
                 self.text_areas[i].text = self.menu_items[item_index]
+
+                line_color = BG_COLOR if item_index is self.current_selection else TEXT_COLOR
+                bg_color = TEXT_COLOR if item_index is self.current_selection else BG_COLOR
+
+                self.text_areas[i].color = line_color
+                self.text_areas[i].background_color = bg_color
             else:
                 self.text_areas[i].text = ""
+
 
         self.display.refresh()
 
@@ -58,10 +72,9 @@ class Menu:
         Update encoder position and button state, modify menu selection.
         """
         # Read encoder position and button
-        position = self.hardware.get_encoder()
-        button_pressed = not self.hardwareget_encoder_button().value  # Button active-low
+        position = self.hardware.get_encoder().position
+        button_pressed = not self.hardware.get_encoder_button().value  # Button active-low
 
-        # Handle encoder rotation
         if position != self.last_position:
             if position > self.last_position:
                 self.current_selection += 1
@@ -70,6 +83,7 @@ class Menu:
 
             # Clamp within menu bounds
             self.current_selection = max(0, min(self.current_selection, len(self.menu_items) - 1))
+
 
             # Adjust top_index for scrolling
             if self.current_selection < self.top_index:
@@ -84,8 +98,8 @@ class Menu:
         # Handle button press
         if button_pressed:
             print("Selected:", self.menu_items[self.current_selection])
-            handle_select_callback(self.menu_items[self.current_selection])
-            time.sleep(0.3)  # Debounce delay
+            self.handle_select_callback(self.current_selection)
+            # time.sleep(0.3)  # Debounce delay
 
 class AppState:
     def __init__(self, hardware, synth_engines):
@@ -102,38 +116,43 @@ class AppState:
         self.is_modal_active = False              
         self.modal_text = ""   
 
-        self.menu = Menu(self.hardware, self.set_active_engine)
-        self.is_menu_active = True
+        self.init_menu()
 
+    def init_menu(self):
+        menu_items = []
+        for synth in self.synth_engines:
+            menu_items.append(synth.title)
+
+        self.menu = Menu(self.hardware, menu_items, self.set_active_engine)
+        self.is_menu_active = True
+    
+    def destruct_menu(self):
+        del self.menu
+        self.menu = None
+        self.is_menu_active = False
+    
     def get_active_engine(self):
         return self.synth_engines[self.active_engine_index]
 
     def set_active_engine(self, index):
         if 0 <= index < len(self.synth_engines):
             self.active_engine_index = index
-            self.init_active_set_active_engine()
             self.is_menu_active = False
+            del self.menu
+            
+            self.init_active_set_active_engine()
 
     def init_active_set_active_engine(self):
-        if !self.active_engine:
-            engine = self.get_active_engine(self.active_engine_index)
+        if not self.active_engine:
+            engine = self.get_active_engine()
             self.active_engine = engine(self.hardware)
-
-    # def toggle_modal(self, text=""):
-    #     # Открыть или закрыть модальное окно
-    #     self.is_modal_active = not self.is_modal_active
-    #     self.modal_text = text if self.is_modal_active else ""
-    
-    # def update_global_setting(self, setting, value):
-    #     # Обновление глобального параметра
-    #     if setting in self.global_settings:
-    #         self.global_settings[setting] = value
 
     def update_ui(self):
         if(self.is_menu_active):
             return self.menu.update_ui()
 
         self.active_engine.update_ui()
+        # self.display.refresh()
     
     def update_input(self):
         if(self.is_menu_active):
