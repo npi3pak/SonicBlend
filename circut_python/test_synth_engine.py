@@ -21,8 +21,8 @@ class TestSynthEngine:
         self.display.root_group = self.group
         self.display.auto_refresh = False
 
-        # self.init_ui()
-        self.init_menu()
+        self.init_ui()
+        # self.init_menu()
         self.init_audio()
 
 
@@ -93,7 +93,7 @@ class TestSynthEngine:
         self.ui['cv_in'].text = "cv: " + str(get_hz_from_cv(cv_in))
 
     def update_ui(self):
-        # self.show_debug_hardware()
+        self.show_debug_hardware()
         self.display.refresh()
         # Обновление параметров на основе ввода
         pass
