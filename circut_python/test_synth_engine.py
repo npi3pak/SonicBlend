@@ -8,7 +8,7 @@ from utils import *
 
 
 class TestSynthEngine:
-    title = ' Knob test '
+    title = 'Knob test'
     def __init__(self, hardware):
         self.hardware = hardware
         self.parameters = {}

@@ -39,10 +39,10 @@ async def input_handler():
         app.update_input()
         await asyncio.sleep(0.001)
 
-async def main():
-    task1 = asyncio.create_task(display_updater())
-    task2 = asyncio.create_task(input_handler())
-    await asyncio.gather(task1, task2)
+# async def main():
+#     task1 = asyncio.create_task(display_updater())
+#     task2 = asyncio.create_task(input_handler())
+#     await asyncio.gather(task1, task2)
 
 # asyncio.run(main())
 

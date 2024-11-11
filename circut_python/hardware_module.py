@@ -9,8 +9,8 @@ import adafruit_displayio_ssd1306
 
 KNOB_1_PIN = board.GP26
 KNOB_2_PIN = board.GP27
-ENC_A_PIN = board.GP0
-ENC_B_PIN = board.GP1
+ENC_A_PIN = board.GP1
+ENC_B_PIN = board.GP0
 ENC_BTN_PIN = board.A3
 CV_IN_PIN = board.GP28
 
