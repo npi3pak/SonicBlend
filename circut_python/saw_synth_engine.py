@@ -82,8 +82,8 @@ class SawSynthEngine:
         # Parameters
         wave_size = 100
         wave_volume = 30000
-        bitmap_width = 128
-        bitmap_height = 64
+        bitmap_width = 32
+        bitmap_height = 32
 
         # Generate the waveform
         wave = saw_down(wave_size, wave_volume)
@@ -102,7 +102,7 @@ class SawSynthEngine:
 
         for ui_item in self.ui.keys():
             self.group.append(self.ui[ui_item])
-            
+
         self.group.append(tile_grid)
         self.update_ui()
 
