@@ -10,21 +10,23 @@ from micropython import const
 import ulab.numpy as np
 from utils import *
 
-def sine(size, volume):
+# size=512, volume=30000
+
+def sine(size=512, volume=30000):
     return np.array(np.sin(np.linspace(0, 2*np.pi, size, endpoint=False)) * volume, dtype=np.int16)
 
-def square(size, volume):
+def square(size=512, volume=30000):
     return np.concatenate((np.ones(size//2, dtype=np.int16) * volume,
                             np.ones(size//2, dtype=np.int16) * -volume))
 
-def triangle(size, min_vol, max_vol):
+def triangle(size=512, min_vol=30000, max_vol):
     return np.concatenate((np.linspace(min_vol, max_vol, num=size//2, dtype=np.int16),
                             np.linspace(max_vol, min_vol, num=size//2, dtype=np.int16)))
 
-def saw_down(size, volume):
+def saw_down(size=512, volume=30000):
     return np.linspace(volume, -volume, num=size, dtype=np.int16)
 
-def saw_up(size, volume):
+def saw_up(size=512, volume=30000):
     return np.linspace(-volume, volume, num=size, dtype=np.int16)
 
 def generate_waveform_bitmap(wave, width, height):
@@ -112,10 +114,16 @@ class SawSynthEngine:
         self.mixer = audiomixer.Mixer(voice_count=1, sample_rate=44100, channel_count=1,
                          bits_per_sample=16, samples_signed=True, buffer_size=32768)
 
-        self.synth = synthio.Synthesizer(sample_rate=44100)
+        saw_wave = saw_down()
+
+        # wave_saw = np.linspace(30000,-30000, num=512, dtype=np.int16)
+        self.synth = synthio.Synthesizer(sample_rate=44100, waveform=saw_wave)
+        
         i2s.play(self.mixer)
         self.mixer.voice[0].level = 0.2 # turn down the volume a bit since this can get loud
         self.mixer.voice[0].play(self.synth)
+
+        self.synth.press(62)
 
     def deinit_audio(self):
         if self.mixer:
