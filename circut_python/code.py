@@ -2,15 +2,14 @@ import microcontroller
 from utils import *
 import asyncio
 from hardware_module import Hardware
-from test_synth_engine import TestSynthEngine
+from knob_test_engine import KnobTestEngine
 from app_state import AppState
 import time
 microcontroller.cpu.frequency = 250_000_000
 
 
 hardware = Hardware()
-# test_synth = TestSynthEngine(hardware)
-app = AppState(hardware, [TestSynthEngine])
+app = AppState(hardware, [KnobTestEngine])
 
 async def display_updater():
     # display

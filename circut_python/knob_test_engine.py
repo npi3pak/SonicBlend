@@ -7,8 +7,9 @@ from utils import *
 
 
 
-class TestSynthEngine:
+class KnobTestEngine:
     title = 'Knob test'
+
     def __init__(self, hardware):
         self.hardware = hardware
         self.parameters = {}
@@ -23,9 +24,11 @@ class TestSynthEngine:
         self.display.auto_refresh = False
 
         self.init_ui()
-        # self.init_menu()
         self.init_audio()
 
+
+    def __del__(self):
+        self.deinit_audio()
 
     def init_ui(self):
 
@@ -53,27 +56,20 @@ class TestSynthEngine:
         self.mixer.voice[0].level = 0.2 # turn down the volume a bit since this can get loud
         self.mixer.voice[0].play(self.synth)
 
-    def init_menu(self):
-        self.ui['item_1'] = label.Label(terminalio.FONT, text="Menu 1", x=10, y=5)
-        self.ui['item_2'] = label.Label(terminalio.FONT, text="Menu 2", x=10, y=15, background_color=0xffffff, color=0x000000)
-        self.ui['item_3'] = label.Label(terminalio.FONT, text="Menu 3", x=10, y=25)
+    def deinit_audio(self):
+        if self.mixer:
+            for voice in self.mixer.voice:
+                voice.stop()  # Stop any active voices
+            self.mixer.deinit()  # Deinitialize the mixer
+            self.mixer = None  # Remove reference to the mixer
+        
+        if self.synth:
+            self.synth = None  # Clear reference to the synthesizer
 
-        # self.ui['item_1'] = label.Label(
-        #     terminalio.FONT, 
-        #     text="Menu 1", 
-        #     x=10, 
-        #     y=5,
-        #     **({"background_color": 0xffffff, "color": 0x000000} if use_colors else {})
-        # )
+        i2s = self.hardware.get_i2s()
 
-        for ui_item in self.ui.keys():
-            self.group.append(self.ui[ui_item])
-
-        self.update_ui()
-        pass
-
-    def show_menu(self):
-        pass
+        if i2s:
+            i2s.stop()
 
     def show_debug_hardware(self):
         knob1, knob2 = self.hardware.get_knobs()
@@ -96,7 +92,6 @@ class TestSynthEngine:
     def update_ui(self):
         self.show_debug_hardware()
         self.display.refresh()
-        # Обновление параметров на основе ввода
         pass
 
     def update_input(self):
