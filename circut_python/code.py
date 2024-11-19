@@ -10,6 +10,7 @@ microcontroller.cpu.frequency = 250_000_000
 
 
 hardware = Hardware()
+
 app = AppState(hardware, [KnobTestEngine, SawSynthEngine])
 
 async def display_updater():
