@@ -49,9 +49,7 @@ class SawSynthEngine:
         self.wave = sine(wave_size, wave_volume)
 
         # Create the bitmap
-        waveform1 = saw_down(size=512)  # Пример: синусоида
-        # waveform_bitmap = generate_waveform_bitmap_ofy(waveform1)
-        # waveform_bitmap = generate_waveform_bitmap_smoothed(waveform1)
+        waveform1 = saw_down(size=512)
         waveform_bitmap = generate_waveform_pixel_art(self.wave)
 
         # Display the bitmap (example using displayio.TileGrid)
@@ -75,18 +73,15 @@ class SawSynthEngine:
         self.mixer = audiomixer.Mixer(voice_count=1, sample_rate=44100, channel_count=1,
                          bits_per_sample=16, samples_signed=True, buffer_size=32768)
 
-        # saw_wave = saw_down()
-        # saw_wave = saw_up()
-        
-
-        # wave_saw = np.linspace(30000,-30000, num=512, dtype=np.int16)
         self.synth = synthio.Synthesizer(sample_rate=44100, waveform=self.wave)
         
         i2s.play(self.mixer)
         self.mixer.voice[0].level = 0.2 # turn down the volume a bit since this can get loud
         self.mixer.voice[0].play(self.synth)
 
-        self.synth.press(62)
+        note = synthio.Note(120)
+        self.synth.press(note)
+        # self.synth.press(62)
 
     def deinit_audio(self):
         if self.mixer:
@@ -122,12 +117,22 @@ class SawSynthEngine:
         self.ui['cv_in'].text = "cv: " + str(get_hz_from_cv(cv_in))
 
     def update_ui(self):
-        # self.show_debug_hardware()
         self.display.refresh()
         pass
 
     def update_input(self):
+        knob1, knob2 = self.hardware.get_knobs()
+        knob_value = get_normalized_value(knob1)
+
+        note = synthio.Note(knob_value)
+        self.synth.press(note)
         pass
 
     def get_synth(self):
         return self.synth
+
+    def knob1_callback(self):
+        pass
+
+    def knob2_callback(self):
+        pass
