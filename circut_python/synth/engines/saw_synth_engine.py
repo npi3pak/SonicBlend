@@ -8,9 +8,9 @@ import synthio
 from collections import namedtuple
 from micropython import const
 import ulab.numpy as np
-from utils import *
+from .utils import *
 from ..ui.generate_waveform_bitmap import *
-from audio_utils import *
+from .audio_utils import *
 
 
 class SawSynthEngine:
@@ -29,10 +29,15 @@ class SawSynthEngine:
         self.display.root_group = self.group
         self.display.auto_refresh = False
 
+        self.note = synthio.Note(400)
+
         self.init_ui()
         self.init_audio()
 
         self.wave = saw_up()
+
+        
+
 
 
     def __del__(self):
@@ -46,7 +51,11 @@ class SawSynthEngine:
         bitmap_height = 32
 
         # Generate the waveform
+        # sine_wave = synthio.SineWave(frequency=440)
+
         self.wave = sine(wave_size, wave_volume)
+        # self.wave = saw_down(size=512)
+        # self.wave = sine_wave
 
         # Create the bitmap
         waveform1 = saw_down(size=512)
@@ -70,17 +79,19 @@ class SawSynthEngine:
     def init_audio(self):
         i2s = self.hardware.get_i2s();
 
-        self.mixer = audiomixer.Mixer(voice_count=1, sample_rate=44100, channel_count=1,
+        self.mixer = audiomixer.Mixer(voice_count=1, sample_rate=44100//2, channel_count=1,
                          bits_per_sample=16, samples_signed=True, buffer_size=32768)
 
-        self.synth = synthio.Synthesizer(sample_rate=44100, waveform=self.wave)
+        self.synth = synthio.Synthesizer(sample_rate=44100//2, waveform=self.wave)
+        # self.synth = synthio.Synthesizer(sample_rate=44100, voices=[self.wave])
         
         i2s.play(self.mixer)
         self.mixer.voice[0].level = 0.2 # turn down the volume a bit since this can get loud
         self.mixer.voice[0].play(self.synth)
 
-        note = synthio.Note(120)
-        self.synth.press(note)
+
+        # note = synthio.Note(300)
+        self.synth.press(self.note)
         # self.synth.press(62)
 
     def deinit_audio(self):
@@ -122,10 +133,16 @@ class SawSynthEngine:
 
     def update_input(self):
         knob1, knob2 = self.hardware.get_knobs()
-        knob_value = get_normalized_value(knob1)
+        knob_value1 = get_normalized_value(knob1)
+        knob_value2 = get_normalized_value(knob2)
 
-        note = synthio.Note(knob_value)
-        self.synth.press(note)
+        if self.note.frequency != knob_value1 + knob_value2:
+            self.note.frequency = knob_value1 + knob_value2
+        # note = synthio.Note(knob_value)
+        # self.synth.press(note)
+        print(knob_value1)
+        # self.synth.releaseAll()
+        # self.synth.press(knob_value)
         pass
 
     def get_synth(self):

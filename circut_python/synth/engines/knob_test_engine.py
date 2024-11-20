@@ -3,7 +3,7 @@ import displayio
 import terminalio
 import displayio, terminalio
 from adafruit_display_text import label
-from utils import *
+from .utils import *
 
 
 
