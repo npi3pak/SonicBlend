@@ -1,5 +1,5 @@
 import time
-from menu import Menu
+from ..ui.menu import Menu
 
 class ButtonHandler:
     def __init__(self, hardware, hold_callback, hold_threshold=0.3):

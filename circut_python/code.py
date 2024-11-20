@@ -1,10 +1,10 @@
 import microcontroller
-from utils import *
+from synth.core.utils import *
 import asyncio
-from hardware_module import Hardware
-from knob_test_engine import KnobTestEngine
-from saw_synth_engine import SawSynthEngine
-from app_state import AppState
+from synth.core.hardware_module import Hardware
+from synth.engines.knob_test_engine import KnobTestEngine
+from synth.engines.saw_synth_engine import SawSynthEngine
+from synth.core.app_state import AppState
 import time
 microcontroller.cpu.frequency = 250_000_000
 
