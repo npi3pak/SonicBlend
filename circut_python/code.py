@@ -4,15 +4,17 @@ import asyncio
 from synth.core.hardware_module import Hardware
 from synth.engines.knob_test_engine import KnobTestEngine
 from synth.engines.saw_synth_engine import SawSynthEngine
+from synth.engines.mono_wave_synth import MonoWaveSynthEngine
+from synth.engines.morph_synth_engine import MorphEngine
 from synth.core.app_state import AppState
 import time
+
 microcontroller.cpu.frequency = 250_000_000
-# microcontroller.cpu.frequency = 100_000_000
 
 
 hardware = Hardware()
 
-app = AppState(hardware, [KnobTestEngine, SawSynthEngine])
+app = AppState(hardware, [KnobTestEngine, SawSynthEngine, MonoWaveSynthEngine, MorphEngine])
 
 
 
